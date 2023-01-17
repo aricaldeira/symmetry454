@@ -1,11 +1,22 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
+#
+# SymmetricCalendar - The Symmetry454 Calendar in Python
+#
+# Copyright (C) 2023–
+# Copyright (C) Ari Caldeira <aricaldeira at gmail.com>
+#
+# Original calendar documentation is Public Domain by it’s author:
+# http://individual.utoronto.ca/kalendis/symmetry.htm
+#
 
-__all__ = ('SymmetricDate')
+__all__ = ('SymmetricDate', 'POSIX_EPOCH')
 
 import time as _time
 import math
 import datetime as _datetime
 import locale
+
 
 #
 # For compatibility with Python’s original date and datetime,
@@ -167,7 +178,7 @@ def _check_date_fields(year, month, day):
 class SymmetricDate():
     __slots__ = '_year', '_month', '_day', '_hashcode', '_gregorian_date', '_holocene', '_is_leap'
 
-    def __new__(cls, year, month=None, day=None):
+    def __new__(cls, year: int | str | _datetime.date, month: int = None, day: int = None):
         """Constructor.
 
         Arguments:
@@ -175,7 +186,7 @@ class SymmetricDate():
         year, month, day (required, base 1)
         """
         if month is None:
-            if type(year) == _datetime.date:
+            if type(year) in (_datetime.date, cls):
                 return cls.fromordinal(year.toordinal())
 
             elif type(year) == str:
@@ -205,11 +216,17 @@ class SymmetricDate():
     # Additional constructors
 
     @classmethod
-    def fromtimestamp(cls, t):
+    def fromtimestamp(cls, timestamp):
         "Construct a date from a POSIX timestamp (like time.time())."
         y, m, d, hh, mm, ss, weekday, jday, dst = _time.localtime(t)
         x = _datetime.date(y, m, d)
         return cls.fromordinal(x.toordinal())
+
+    def timestamp(self):
+        ordinal_date = self.toordinal()
+        timestamp = ordinal_date - POSIX_EPOCH
+        timestamp *= 24 * 60 * 60
+        return timestamp
 
     @classmethod
     def today(cls):
@@ -607,13 +624,14 @@ if __name__ == '__main__':
     print(' ===========================================')
 
     dates = [
-        ((1500, 5, 21), 'Descobrimento do Brasil (22-abr-1500 cal. juliano)'),
-        ((1532, 2, 15), 'Fundação de São Vicente (22-jan-1532 cal. juliano)'),
-        ((1554, 2, 22), 'Fundação de São Paulo (25-jan-1554 cal. juliano)'),
+        ((1500, 5, 3), 'Descobrimento do Brasil (22-abr-1500 cal. juliano)'),
+        ((1532, 2, 1), 'Fundação de São Vicente (22-jan-1532 cal. juliano)'),
+        ((1554, 2, 4), 'Fundação de São Paulo (25-jan-1554 cal. juliano)'),
         ((1792, 4, 20), 'Tiradentes'),
         ((1822, 9, 6), 'Independência'),
         ((1857, 5, 12), 'Dia da Mulher'),
         ((1886, 4, 27), 'Dia do Trabalhador'),
+        ((1888, 5, 14), 'Libertação da Escravatura'),
         ((1889, 11, 19), 'Proclamação da República'),
         ((1932, 7, 6), 'Revolução Constitucionalista'),
         ((1968, 1, 1), 'Fraternidade Universal'),
