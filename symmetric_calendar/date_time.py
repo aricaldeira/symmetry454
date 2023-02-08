@@ -22,7 +22,7 @@ from .date import SymmetricDate, POSIX_EPOCH
 class SymmetricDateTime(SymmetricDate):
     __slots__ =  '_date', '_time', '_year', '_month', '_day', '_hashcode', '_gregorian_date', '_holocene', '_is_leap', '_hour', '_minute', '_second', '_microsecond', '_tzinfo', '_hashcode', '_fold', '_gregorian_date_time'
 
-    def __new__(cls, year, month=None, day=None, hour=0, minute=0, second=0, microsecond=0, tzinfo=None, *, fold=0):
+    def __new__(cls, year, month=None, day=None, hour=0, minute=0, second=0, microsecond=0, tzinfo=None, *, holocene=False, fold=0):
         if month is None:
             if type(year) in (_datetime.datetime, SymmetricDateTime):
                 return cls.fromtimestamp(year.timestamp())
@@ -44,14 +44,14 @@ class SymmetricDateTime(SymmetricDate):
                 second = int(second)
 
         self = object.__new__(cls)
-        self._date = SymmetricDate(year, month, day)
+        self._date = SymmetricDate(year, month, day, holocene=holocene)
         self._year = self._date.year
         self._month = self._date.month
         self._day = self._date.day
-        self._hashcode = -1
-        self._gregorian_date = self._date.gregorian_date
-        self._holocene = self._date._holocene
+        self._holocene = self._date.is_holocene
         self._is_leap = self._date.is_leap
+        self._gregorian_date = self._date.gregorian_date
+        self._hashcode = -1
 
         self._time = _datetime.time(hour, minute, second, microsecond, tzinfo, fold=fold)
         self._hour = self._time.hour
@@ -140,73 +140,7 @@ class SymmetricDateTime(SymmetricDate):
         #
         # Deals with what is or may be different from the Gregorian Calendar
         #
-        fmt = fmt.replace('%%', '__PERCENT__')
-
-        if '%a' in fmt:
-            fmt = fmt.replace('%a', self._strftime_locale('%a'))
-
-        if '%A' in fmt:
-            fmt = fmt.replace('%A', self._strftime_locale('%A'))
-
-        if '%d' in fmt:
-            fmt = fmt.replace('%d', str(self.day).zfill(2))
-
-        if '%-d' in fmt:
-            fmt = fmt.replace('%-d', str(self.day))
-
-        if '%o' in fmt:
-            fmt = fmt.replace('%o', self._strftime_ordinal_suffix())
-
-        if '%m' in fmt:
-            fmt = fmt.replace('%m', str(self.month).zfill(2))
-
-        if '%-m' in fmt:
-            fmt = fmt.replace('%-m', str(self.month))
-
-        if '%b' in fmt:
-            fmt = fmt.replace('%b', self._strftime_locale('%b'))
-
-        if '%B' in fmt:
-            fmt = fmt.replace('%B', self._strftime_locale('%B'))
-
-        if '%y' in fmt:
-            fmt = fmt.replace('%y', str(self.year))
-
-        if '%Y' in fmt:
-            fmt = fmt.replace('%Y', str(self.year))
-
-        if '%j' in fmt:
-            fmt = fmt.replace('%j', self._strftime_day_in_year().zfill(3))
-
-        if '%-j' in fmt:
-            fmt = fmt.replace('%j', self._strftime_day_in_year())
-
-        if '%w' in fmt:
-            fmt = fmt.replace('%w', self._strftime_weekday_number())
-
-        if '%U' in fmt:
-            fmt = fmt.replace('%U', self._strftime_week_in_year().zfill(2))
-
-        if '%-U' in fmt:
-            fmt = fmt.replace('%U', self._strftime_week_in_year())
-
-        if '%W' in fmt:
-            fmt = fmt.replace('%W', self._strftime_week_in_year().zfill(2))
-
-        if '%-W' in fmt:
-            fmt = fmt.replace('%W', self._strftime_week_in_year())
-
-        if '%c' in fmt:
-            fmt = fmt.replace('%c', self.strftime(locale.nl_langinfo(locale.D_T_FMT)))
-
-        if '%x' in fmt:
-            fmt = fmt.replace('%x', self.strftime(locale.nl_langinfo(locale.D_FMT)))
-
-        if '%X' in fmt:
-            fmt = fmt.replace('%X', self.strftime(locale.nl_langinfo(locale.T_FMT)))
-
-        fmt = fmt.replace('__PERCENT__', '%%')
-
+        fmt = self._date.strftime(fmt)
         return self._gregorian_date_time.strftime(fmt)
 
     @classmethod
