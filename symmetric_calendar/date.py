@@ -35,7 +35,7 @@ EPOCH = 1
 
 #
 # For the Holocene year counting,
-# 00_001-01-01 HOLOCENE SYMMETRIC → -9_998-01-01 GREGORIAN (no year zero)
+# 00_001-01-01 HOLOCENE SYMMETRIC → -10_000-01-01 GREGORIAN (no year zero)
 # → -9_999-01-01 ISO (with year 0) → -3_652_424
 #
 HOLOCENE_MAXYEAR = 19_998
