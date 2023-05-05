@@ -68,24 +68,33 @@ def _is_leap(year, holocene=False):
     "year -> 7 if leap year, else 0."
 
     #
-    # For years before 1, Holocene 10_001,
-    # the leap year rule, according to Kalendis,
-    # considers
+    # The different factor for the Holocene Epoch ensures
+    # that the same years are considered leap, using either
+    # Epoch
     #
     if holocene:
-        year -= 10_000
+        factor = 221
+    else:
+        factor = 146
 
-    return 7 if (((year * 52) + 146) % 293) < 52 else 0
+    return 7 if (((year * 52) + factor) % 293) < 52 else 0
 
 
 def _days_before_year(year, holocene=False):
     "year -> number of days before January 1st of year."
     year -= 1
 
+    #
+    # The different factor for the Holocene Epoch ensures
+    # that the same years are considered leap, using either
+    # Epoch
+    #
     if holocene:
-        year -= 10_000
+        factor = 221
+    else:
+        factor = 146
 
-    return (364 * year) + (7 * math.floor(((52 * year) + 146) / 293))
+    return (364 * year) + (7 * math.floor(((52 * year) + factor) / 293))
 
 
 def _days_in_month(year, month, holocene=False):
